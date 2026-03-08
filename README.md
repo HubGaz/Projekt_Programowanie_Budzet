@@ -1,2 +1,2 @@
 # Projekt_Programowanie
-Grupowy
+Grupowy PZPP
