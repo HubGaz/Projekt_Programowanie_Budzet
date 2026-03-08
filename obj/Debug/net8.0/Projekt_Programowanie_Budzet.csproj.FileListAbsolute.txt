@@ -1,0 +1,15 @@
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\bin\Debug\net8.0\Projekt_Programowanie_Budzet.exe
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\bin\Debug\net8.0\Projekt_Programowanie_Budzet.deps.json
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\bin\Debug\net8.0\Projekt_Programowanie_Budzet.runtimeconfig.json
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\bin\Debug\net8.0\Projekt_Programowanie_Budzet.dll
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\bin\Debug\net8.0\Projekt_Programowanie_Budzet.pdb
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.AssemblyInfoInputs.cache
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.AssemblyInfo.cs
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.csproj.CoreCompileInputs.cache
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.sourcelink.json
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.dll
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\refint\Projekt_Programowanie_Budzet.dll
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.pdb
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.genruntimeconfig.cache
+C:\Users\diabl\Desktop\Programowanie_Projekt_Budzet\Projekt_Programowanie_Budzet\obj\Debug\net8.0\ref\Projekt_Programowanie_Budzet.dll
