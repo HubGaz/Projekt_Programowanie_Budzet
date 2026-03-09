@@ -12,21 +12,38 @@ namespace main
                 Console.WriteLine("2. Add expense");
                 Console.WriteLine("3. View balance");
                 Console.WriteLine("4. Exit");
-                Console.Write("Choose option (1-4): ");
-                string input = Console.ReadLine();
+                Console.WriteLine("5. Check current Expenses");
+                Console.Write("Choose option (1-5): ");
+                string? input = Console.ReadLine();
+
+                if (input is null)
+                {
+                    Console.WriteLine("-> Invalid option.");
+                    continue;
+                }
 
                 switch (input)
                 {
                     case "1": Console.WriteLine("-> Adding income..."); break;
-                    case "2": Console.WriteLine("-> Adding expense..."); break;
+                    case "2": Console.WriteLine("-> Adding expense...");
+                    Console.Write("Enter expense amount: ");
+                        if (double.TryParse(Console.ReadLine(), out double expense))
+                        {
+                            Expenses.AddExpense(expense);
+                            Console.WriteLine("Expense added.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid amount.");
+                        }
+                    break;
                     case "3": Console.WriteLine("-> Showing balance..."); break;
                     case "4":
                         Console.WriteLine("-> Goodbye!");
                         return;
+                    case "5": Console.WriteLine($"->Current expenses: " + Expenses.Total_Expenses); break;
                     default: Console.WriteLine("-> Invalid option."); break;
-                    //Zmiana z brancha 
-                    //Zmiana 2 z brancha
-                    // Zmiana z maina 
+                    
                 }
             }
         }
