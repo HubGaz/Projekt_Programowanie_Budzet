@@ -30,6 +30,12 @@ namespace main
                         Console.Write("Enter expense amount: ");
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
+                            if (expense <= 0)
+                            {
+                                Console.WriteLine("Amount must be greater than 0. Expense not added.");
+                                break;
+                            }
+
                             Console.Write("Enter expense description: ");
                             string? description = Console.ReadLine();
 
@@ -45,7 +51,7 @@ namespace main
                         }
                         else
                         {
-                            Console.WriteLine("Invalid amount.");
+                            Console.WriteLine("Invalid amount. Please enter a number.");
                         }
                         break;
                     case "3": Console.WriteLine("-> Showing balance..."); break;

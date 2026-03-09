@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 
-namespace main
+namespace BudgetManagement.MoneyManagement
 {
     public static class Expenses
     {
@@ -18,7 +18,6 @@ namespace main
             }
 
             Total_Expenses += amount;
-            Current_Balance -= amount;
 
             ExpenseList.Add((amount, description));
         }
