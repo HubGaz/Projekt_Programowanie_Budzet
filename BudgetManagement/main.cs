@@ -1,4 +1,5 @@
 using System;
+using BudgetManagement.MoneyManagement;
 namespace main
 {
     class Program
@@ -11,8 +12,8 @@ namespace main
                 Console.WriteLine("1. Add income");
                 Console.WriteLine("2. Add expense");
                 Console.WriteLine("3. View balance");
-                Console.WriteLine("4. Exit");
-                Console.WriteLine("5. Check current Expenses");
+                Console.WriteLine("4. Check current Expenses");
+                Console.WriteLine("5. Exit");
                 Console.Write("Choose option (1-5): ");
                 string? input = Console.ReadLine();
 
@@ -49,9 +50,6 @@ namespace main
                         break;
                     case "3": Console.WriteLine("-> Showing balance..."); break;
                     case "4":
-                        Console.WriteLine("-> Goodbye!");
-                        return;
-                    case "5":
                         Console.WriteLine("-> Current expenses:");
                         if (Expenses.ExpenseList.Count == 0)
                         {
@@ -67,6 +65,10 @@ namespace main
                             Console.WriteLine($"Total expenses: {Expenses.Total_Expenses}");
                         }
                         break;
+                    case "5":
+                        Console.WriteLine("-> Goodbye!");
+                        return;
+                    
                     default: Console.WriteLine("-> Invalid option."); break;
                     
                 }
