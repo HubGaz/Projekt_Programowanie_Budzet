@@ -1,16 +1,12 @@
 
-using System.Collections.Generic;
-
-namespace BudgetManagement.MoneyManagement
+namespace main
 {
     public static class Expenses
     {
         public static double Current_Balance = 0.0;
         public static double Total_Expenses = 0.0;
 
-        public static List<(double Amount, string Description)> ExpenseList { get; } = new();
-
-        public static void AddExpense(double amount, string description)
+        public static void AddExpense(double amount)
         {
             if (amount < 0)
             {
@@ -18,8 +14,7 @@ namespace BudgetManagement.MoneyManagement
             }
 
             Total_Expenses += amount;
-
-            ExpenseList.Add((amount, description));
+            Current_Balance -= amount;
         }
     }
 }

@@ -1,5 +1,8 @@
 using System;
+
+using BudgetManagement.FileManagement;
 using BudgetManagement.MoneyManagement;
+
 namespace main
 {
     class Program
@@ -8,12 +11,15 @@ namespace main
         {
             while (true)
             {
+                Files.Create("income.json");
+
+                Console.Clear();
                 Console.WriteLine("=== Menu ===");
                 Console.WriteLine("1. Add income");
                 Console.WriteLine("2. Add expense");
                 Console.WriteLine("3. View balance");
-                Console.WriteLine("4. Check current Expenses");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("4. Exit");
+                Console.WriteLine("5. Check current Expenses");
                 Console.Write("Choose option (1-5): ");
                 string? input = Console.ReadLine();
 
@@ -25,56 +31,32 @@ namespace main
 
                 switch (input)
                 {
-                    case "1": Console.WriteLine("-> Adding income..."); break;
+                    case "1": Console.WriteLine("-> Adding income...");
+                            Console.Write("Enter income amount: ");
+                        if (double.TryParse(Console.ReadLine(), out double income))
+                        {
+                            Incomes.AddIncome(income);
+                            Files.Append("income.json", income);
+                            Console.WriteLine("Income added.");
+                        }
+                        break;
                     case "2": Console.WriteLine("-> Adding expense...");
-                        Console.Write("Enter expense amount: ");
+                    Console.Write("Enter expense amount: ");
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
-                            if (expense <= 0)
-                            {
-                                Console.WriteLine("Amount must be greater than 0. Expense not added.");
-                                break;
-                            }
-
-                            Console.Write("Enter expense description: ");
-                            string? description = Console.ReadLine();
-
-                            if (string.IsNullOrWhiteSpace(description))
-                            {
-                                Console.WriteLine("Description is required. Expense not added.");
-                            }
-                            else
-                            {
-                                Expenses.AddExpense(expense, description);
-                                Console.WriteLine("Expense added.");
-                            }
+                            Expenses.AddExpense(expense);
+                            Console.WriteLine("Expense added.");
                         }
                         else
                         {
-                            Console.WriteLine("Invalid amount. Please enter a number.");
+                            Console.WriteLine("Invalid amount.");
                         }
-                        break;
+                    break;
                     case "3": Console.WriteLine("-> Showing balance..."); break;
                     case "4":
-                        Console.WriteLine("-> Current expenses:");
-                        if (Expenses.ExpenseList.Count == 0)
-                        {
-                            Console.WriteLine("No expenses recorded.");
-                        }
-                        else
-                        {
-                            foreach (var item in Expenses.ExpenseList)
-                            {
-                                Console.WriteLine($"- {item.Amount} : {item.Description}");
-                            }
-
-                            Console.WriteLine($"Total expenses: {Expenses.Total_Expenses}");
-                        }
-                        break;
-                    case "5":
                         Console.WriteLine("-> Goodbye!");
                         return;
-                    
+                    case "5": Console.WriteLine($"->Current expenses: " + Expenses.Total_Expenses); break;
                     default: Console.WriteLine("-> Invalid option."); break;
                     
                 }
