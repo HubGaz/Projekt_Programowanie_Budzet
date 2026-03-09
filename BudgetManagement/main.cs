@@ -26,22 +26,47 @@ namespace main
                 {
                     case "1": Console.WriteLine("-> Adding income..."); break;
                     case "2": Console.WriteLine("-> Adding expense...");
-                    Console.Write("Enter expense amount: ");
+                        Console.Write("Enter expense amount: ");
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
-                            Expenses.AddExpense(expense);
-                            Console.WriteLine("Expense added.");
+                            Console.Write("Enter expense description: ");
+                            string? description = Console.ReadLine();
+
+                            if (string.IsNullOrWhiteSpace(description))
+                            {
+                                Console.WriteLine("Description is required. Expense not added.");
+                            }
+                            else
+                            {
+                                Expenses.AddExpense(expense, description);
+                                Console.WriteLine("Expense added.");
+                            }
                         }
                         else
                         {
                             Console.WriteLine("Invalid amount.");
                         }
-                    break;
+                        break;
                     case "3": Console.WriteLine("-> Showing balance..."); break;
                     case "4":
                         Console.WriteLine("-> Goodbye!");
                         return;
-                    case "5": Console.WriteLine($"->Current expenses: " + Expenses.Total_Expenses); break;
+                    case "5":
+                        Console.WriteLine("-> Current expenses:");
+                        if (Expenses.ExpenseList.Count == 0)
+                        {
+                            Console.WriteLine("No expenses recorded.");
+                        }
+                        else
+                        {
+                            foreach (var item in Expenses.ExpenseList)
+                            {
+                                Console.WriteLine($"- {item.Amount} : {item.Description}");
+                            }
+
+                            Console.WriteLine($"Total expenses: {Expenses.Total_Expenses}");
+                        }
+                        break;
                     default: Console.WriteLine("-> Invalid option."); break;
                     
                 }
