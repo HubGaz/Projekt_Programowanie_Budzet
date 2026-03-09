@@ -14,7 +14,13 @@ namespace main
                 Console.WriteLine("4. Exit");
                 Console.WriteLine("5. Check current Expenses");
                 Console.Write("Choose option (1-5): ");
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
+
+                if (input is null)
+                {
+                    Console.WriteLine("-> Invalid option.");
+                    continue;
+                }
 
                 switch (input)
                 {
