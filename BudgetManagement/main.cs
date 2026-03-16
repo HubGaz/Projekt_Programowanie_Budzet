@@ -13,6 +13,8 @@ namespace main
             while (true)
             {
                 Files.Create("income.json");
+                Files.Create("balance.json");
+                Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
 
                 try
                 {
@@ -45,6 +47,7 @@ namespace main
                         {
                             Incomes.AddIncome(income);
                             Files.Append("income.json", income);
+                            Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Income added.");
                         }
                         break;
@@ -53,6 +56,7 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
                             Expenses.AddExpense(expense);
+                            Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Expense added.");
                         }
                         else
