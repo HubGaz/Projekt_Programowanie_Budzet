@@ -13,6 +13,8 @@ namespace main
             while (true)
             {
                 Files.Create("income.json");
+                Files.Create("balance.json");
+                Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
 
                 try
                 {
@@ -45,6 +47,7 @@ namespace main
                         {
                             Incomes.AddIncome(income);
                             Files.Append("income.json", income);
+                            Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Income added.");
                         }
                         break;
@@ -53,6 +56,7 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
                             Expenses.AddExpense(expense);
+                            Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Expense added.");
                         }
                         else
@@ -60,11 +64,16 @@ namespace main
                             Console.WriteLine("Invalid amount.");
                         }
                     break;
-                    case "3": Console.WriteLine("-> Showing balance..."); break;
+                    case "3":
+                        Console.WriteLine("-> Current balance:");
+                        Console.WriteLine(Incomes.Total_Incomes - Expenses.Total_Expenses);
+                        break;
                     case "4":
-                        Console.WriteLine($"->Current expenses: " + Expenses.Total_Expenses);
+                        Console.WriteLine($"-> Current expenses: " + Expenses.Total_Expenses);
+                        break;
+                    case "5":
+                        Console.WriteLine("-> Goodbye!");
                         return;
-                    case "5": Console.WriteLine("-> Goodbye!"); break;
                     default: Console.WriteLine("-> Invalid option."); break;
                     
                 }

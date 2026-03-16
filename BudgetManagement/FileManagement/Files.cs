@@ -1,4 +1,6 @@
-﻿
+
+using System.Text.Json;
+
 namespace BudgetManagement.FileManagement;
 
 public static class Files
@@ -60,6 +62,25 @@ public static class Files
         catch (Exception ex)
         {
             Console.WriteLine($"An error occurred while appending to the file: {ex.Message}");
+        }
+    }
+
+    public static void WriteCurrentBalance(string filePath, double currentBalance)
+    {
+        try
+        {
+            var payload = new
+            {
+                currentBalance = currentBalance,
+                updatedAt = DateTimeOffset.Now
+            };
+
+            var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+            System.IO.File.WriteAllText(filePath, json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while writing balance JSON: {ex.Message}");
         }
     }
 }
