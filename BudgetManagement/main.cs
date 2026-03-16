@@ -64,7 +64,10 @@ namespace main
                             Console.WriteLine("Invalid amount.");
                         }
                     break;
-                    case "3": Console.WriteLine("-> Showing balance..."); break;
+                    case "3":
+                        Console.WriteLine("-> Current balance:");
+                        Console.WriteLine(Incomes.Total_Incomes - Expenses.Total_Expenses);
+                        break;
                     case "4":
                         Console.WriteLine($"-> Current expenses: " + Expenses.Total_Expenses);
                         break;
