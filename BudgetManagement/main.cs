@@ -62,9 +62,11 @@ namespace main
                     break;
                     case "3": Console.WriteLine("-> Showing balance..."); break;
                     case "4":
-                        Console.WriteLine($"->Current expenses: " + Expenses.Total_Expenses);
+                        Console.WriteLine($"-> Current expenses: " + Expenses.Total_Expenses);
+                        break;
+                    case "5":
+                        Console.WriteLine("-> Goodbye!");
                         return;
-                    case "5": Console.WriteLine("-> Goodbye!"); break;
                     default: Console.WriteLine("-> Invalid option."); break;
                     
                 }
