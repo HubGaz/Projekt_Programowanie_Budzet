@@ -6,26 +6,26 @@ public static class AuthService
     {
         if (string.IsNullOrWhiteSpace(username))
         {
-            message = "Nazwa uzytkownika nie moze byc pusta.";
+            message = "Username cannot be empty.";
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            message = "Haslo nie moze byc puste.";
+            message = "Password cannot be empty.";
             return false;
         }
 
         if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
         {
-            message = "Hasla nie sa takie same.";
+            message = "Passwords do not match.";
             return false;
         }
 
         var users = UserStore.LoadUsers();
         if (users.Any(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase)))
         {
-            message = "Uzytkownik o tej nazwie juz istnieje.";
+            message = "A user with this name already exists.";
             return false;
         }
 
@@ -38,7 +38,7 @@ public static class AuthService
         });
 
         UserStore.SaveUsers(users);
-        message = "Konto zostalo utworzone.";
+        message = "Account has been created.";
         return true;
     }
 
@@ -50,18 +50,18 @@ public static class AuthService
 
         if (user is null)
         {
-            message = "Nie znaleziono uzytkownika.";
+            message = "User was not found.";
             return false;
         }
 
         var hash = PasswordHasher.Hash(password, user.Salt);
         if (!string.Equals(hash, user.PasswordHash, StringComparison.Ordinal))
         {
-            message = "Niepoprawne haslo.";
+            message = "Incorrect password.";
             return false;
         }
 
-        message = "Zalogowano poprawnie.";
+        message = "Logged in successfully.";
         return true;
     }
 }

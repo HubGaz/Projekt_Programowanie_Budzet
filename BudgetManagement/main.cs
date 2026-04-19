@@ -37,7 +37,7 @@ namespace main
                 }
 
                 Aestetics.Logo();
-                Console.WriteLine($"Zalogowany uzytkownik: {loggedInUsername}");
+                Console.WriteLine($"Logged in as: {loggedInUsername}");
 
                 Console.WriteLine("");
                 Console.WriteLine("=== Menu ===");
@@ -176,19 +176,19 @@ namespace main
 
                 Aestetics.Logo();
                 Console.WriteLine();
-                Console.WriteLine("=== Logowanie ===");
-                Console.WriteLine("1. Zaloguj");
-                Console.WriteLine("2. Utworz konto");
-                Console.WriteLine("3. Wyjdz");
-                Console.Write("Wybierz opcje (1-3): ");
+                Console.WriteLine("=== Login ===");
+                Console.WriteLine("1. Sign in");
+                Console.WriteLine("2. Create account");
+                Console.WriteLine("3. Exit");
+                Console.Write("Choose option (1-3): ");
                 var choice = Console.ReadLine();
 
                 switch (choice)
                 {
                     case "1":
-                        Console.Write("Nazwa uzytkownika: ");
+                        Console.Write("Username: ");
                         var loginUsername = Console.ReadLine() ?? string.Empty;
-                        Console.Write("Haslo: ");
+                        Console.Write("Password: ");
                         var loginPassword = Console.ReadLine() ?? string.Empty;
 
                         if (AuthService.Login(loginUsername, loginPassword, out var loginMessage))
@@ -202,11 +202,11 @@ namespace main
                         Aestetics.WaitForEnter();
                         break;
                     case "2":
-                        Console.Write("Nazwa uzytkownika: ");
+                        Console.Write("Username: ");
                         var registerUsername = Console.ReadLine() ?? string.Empty;
-                        Console.Write("Haslo: ");
+                        Console.Write("Password: ");
                         var registerPassword = Console.ReadLine() ?? string.Empty;
-                        Console.Write("Powtorz haslo: ");
+                        Console.Write("Repeat password: ");
                         var repeatPassword = Console.ReadLine() ?? string.Empty;
 
                         AuthService.Register(registerUsername, registerPassword, repeatPassword, out var registerMessage);
@@ -216,7 +216,7 @@ namespace main
                     case "3":
                         return null;
                     default:
-                        Console.WriteLine("Niepoprawna opcja.");
+                        Console.WriteLine("Invalid option.");
                         Aestetics.WaitForEnter();
                         break;
                 }
