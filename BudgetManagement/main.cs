@@ -1,5 +1,6 @@
 
 using BudgetManagement.FileManagement;
+using BudgetManagement.Authentication;
 using BudgetManagement.MoneyManagement;
 using BudgetManagement.Miscellaneous;
 
@@ -7,19 +8,24 @@ namespace main
 {
     class Program
     {
-
-
         static void Main(string[] args)
         {
-            Files.Create("income.json");
-            Files.Create("expense.json");
-            Files.Create("balance.json");
+            var loggedInUsername = ShowAuthScreen();
+            if (loggedInUsername is null)
+            {
+                return;
+            }
+
+            var userFiles = new UserFilePaths(loggedInUsername);
+            Files.Create(userFiles.IncomeFilePath);
+            Files.Create(userFiles.ExpenseFilePath);
+            Files.Create(userFiles.BalanceFilePath);
 
             while (true)
             {
-                Incomes.Total_Incomes = Files.ReadTotalAmount("income.json");
-                Expenses.Total_Expenses = Files.ReadTotalAmount("expense.json");
-                Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
+                Incomes.Total_Incomes = Files.ReadTotalAmount(userFiles.IncomeFilePath);
+                Expenses.Total_Expenses = Files.ReadTotalAmount(userFiles.ExpenseFilePath);
+                Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
 
                 try
                 {
@@ -31,6 +37,7 @@ namespace main
                 }
 
                 Aestetics.Logo();
+                Console.WriteLine($"Zalogowany uzytkownik: {loggedInUsername}");
 
                 Console.WriteLine("");
                 Console.WriteLine("=== Menu ===");
@@ -60,8 +67,8 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double income))
                         {
                             Incomes.AddIncome(income);
-                            Files.AppendAmountByDate("income.json", income);
-                            Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
+                            Files.AppendAmountByDate(userFiles.IncomeFilePath, income);
+                            Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Income added.");
                         }
                         else
@@ -74,8 +81,8 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
                             Expenses.AddExpense(expense);
-                            Files.AppendAmountByDate("expense.json", expense);
-                            Files.WriteCurrentBalance("balance.json", Incomes.Total_Incomes - Expenses.Total_Expenses);
+                            Files.AppendAmountByDate(userFiles.ExpenseFilePath, expense);
+                            Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Expense added.");
                         }
                         else
@@ -90,7 +97,7 @@ namespace main
                     case "4":
                         Console.WriteLine("-> Expense history:");
                         {
-                            var history = Files.ReadAmountsByDate("expense.json");
+                            var history = Files.ReadAmountsByDate(userFiles.ExpenseFilePath);
                             if (history.Count == 0)
                             {
                                 Console.WriteLine("(empty)");
@@ -107,7 +114,7 @@ namespace main
                     case "5":
                         Console.WriteLine("-> Income history:");
                         {
-                            var history = Files.ReadAmountsByDate("income.json");
+                            var history = Files.ReadAmountsByDate(userFiles.IncomeFilePath);
                             if (history.Count == 0)
                             {
                                 Console.WriteLine("(empty)");
@@ -127,13 +134,13 @@ namespace main
                         if (string.Equals(confirmDelete, "y", StringComparison.OrdinalIgnoreCase))
                         {
                             Console.WriteLine("-> Deleting all entries...");
-                            Files.Delete("income.json");
-                            Files.Delete("expense.json");
-                            Files.Delete("balance.json");
+                            Files.Delete(userFiles.IncomeFilePath);
+                            Files.Delete(userFiles.ExpenseFilePath);
+                            Files.Delete(userFiles.BalanceFilePath);
                             Console.WriteLine("All files deleted.");
-                            Files.Create("income.json");
-                            Files.Create("expense.json");
-                            Files.Create("balance.json");
+                            Files.Create(userFiles.IncomeFilePath);
+                            Files.Create(userFiles.ExpenseFilePath);
+                            Files.Create(userFiles.BalanceFilePath);
                             Incomes.Total_Incomes = 0.0;
                             Expenses.Total_Expenses = 0.0;
                         }
@@ -154,5 +161,66 @@ namespace main
             }
         }
 
+        private static string? ShowAuthScreen()
+        {
+            while (true)
+            {
+                try
+                {
+                    Console.Clear();
+                }
+                catch (IOException)
+                {
+                    // ignored
+                }
+
+                Aestetics.Logo();
+                Console.WriteLine();
+                Console.WriteLine("=== Logowanie ===");
+                Console.WriteLine("1. Zaloguj");
+                Console.WriteLine("2. Utworz konto");
+                Console.WriteLine("3. Wyjdz");
+                Console.Write("Wybierz opcje (1-3): ");
+                var choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.Write("Nazwa uzytkownika: ");
+                        var loginUsername = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Haslo: ");
+                        var loginPassword = Console.ReadLine() ?? string.Empty;
+
+                        if (AuthService.Login(loginUsername, loginPassword, out var loginMessage))
+                        {
+                            Console.WriteLine(loginMessage);
+                            Aestetics.WaitForEnter();
+                            return loginUsername.Trim();
+                        }
+
+                        Console.WriteLine(loginMessage);
+                        Aestetics.WaitForEnter();
+                        break;
+                    case "2":
+                        Console.Write("Nazwa uzytkownika: ");
+                        var registerUsername = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Haslo: ");
+                        var registerPassword = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Powtorz haslo: ");
+                        var repeatPassword = Console.ReadLine() ?? string.Empty;
+
+                        AuthService.Register(registerUsername, registerPassword, repeatPassword, out var registerMessage);
+                        Console.WriteLine(registerMessage);
+                        Aestetics.WaitForEnter();
+                        break;
+                    case "3":
+                        return null;
+                    default:
+                        Console.WriteLine("Niepoprawna opcja.");
+                        Aestetics.WaitForEnter();
+                        break;
+                }
+            }
+        }
     }
 }
