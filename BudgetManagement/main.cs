@@ -10,7 +10,9 @@ namespace main
     {
         static void Main(string[] args)
         {
-            var loggedInUsername = ShowAuthScreen();
+            using var soundPlayer = new AsyncSoundPlayer();
+
+            var loggedInUsername = ShowAuthScreen(soundPlayer);
             if (loggedInUsername is null)
             {
                 return;
@@ -56,6 +58,7 @@ namespace main
                 if (input is null)
                 {
                     Console.WriteLine("-> Invalid option.");
+                    soundPlayer.Play(SoundEffect.Error);
                     Aestetics.WaitForEnter();
                     continue;
                 }
@@ -70,10 +73,12 @@ namespace main
                             Files.AppendAmountByDate(userFiles.IncomeFilePath, income);
                             Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Income added.");
+                            soundPlayer.Play(SoundEffect.Success);
                         }
                         else
                         {
                             Console.WriteLine("Invalid amount.");
+                            soundPlayer.Play(SoundEffect.Error);
                         }
                         break;
                     case "2": Console.WriteLine("-> Adding expense...");
@@ -84,10 +89,12 @@ namespace main
                             Files.AppendAmountByDate(userFiles.ExpenseFilePath, expense);
                             Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Expense added.");
+                            soundPlayer.Play(SoundEffect.Success);
                         }
                         else
                         {
                             Console.WriteLine("Invalid amount.");
+                            soundPlayer.Play(SoundEffect.Error);
                         }
                     break;
                     case "3":
@@ -143,17 +150,23 @@ namespace main
                             Files.Create(userFiles.BalanceFilePath);
                             Incomes.Total_Incomes = 0.0;
                             Expenses.Total_Expenses = 0.0;
+                            soundPlayer.Play(SoundEffect.Warning);
                         }
                         else
                         {
                             Console.WriteLine("Delete cancelled.");
+                            soundPlayer.Play(SoundEffect.Info);
                         }
                         break;
                     case "7":
                         Console.WriteLine("-> Goodbye!");
+                        soundPlayer.Play(SoundEffect.Info);
                         Aestetics.WaitForEnter();
                         return;
-                    default: Console.WriteLine("-> Invalid option."); break;
+                    default:
+                        Console.WriteLine("-> Invalid option.");
+                        soundPlayer.Play(SoundEffect.Error);
+                        break;
                     
                 }
 
@@ -161,7 +174,7 @@ namespace main
             }
         }
 
-        private static string? ShowAuthScreen()
+        private static string? ShowAuthScreen(AsyncSoundPlayer soundPlayer)
         {
             while (true)
             {
@@ -194,11 +207,13 @@ namespace main
                         if (AuthService.Login(loginUsername, loginPassword, out var loginMessage))
                         {
                             Console.WriteLine(loginMessage);
+                            soundPlayer.Play(SoundEffect.Success);
                             Aestetics.WaitForEnter();
                             return loginUsername.Trim();
                         }
 
                         Console.WriteLine(loginMessage);
+                        soundPlayer.Play(SoundEffect.Error);
                         Aestetics.WaitForEnter();
                         break;
                     case "2":
@@ -209,14 +224,24 @@ namespace main
                         Console.Write("Repeat password: ");
                         var repeatPassword = Console.ReadLine() ?? string.Empty;
 
-                        AuthService.Register(registerUsername, registerPassword, repeatPassword, out var registerMessage);
+                        var registerSucceeded = AuthService.Register(registerUsername, registerPassword, repeatPassword, out var registerMessage);
                         Console.WriteLine(registerMessage);
+                        if (registerSucceeded)
+                        {
+                            soundPlayer.Play(SoundEffect.Success);
+                        }
+                        else
+                        {
+                            soundPlayer.Play(SoundEffect.Error);
+                        }
                         Aestetics.WaitForEnter();
                         break;
                     case "3":
+                        soundPlayer.Play(SoundEffect.Info);
                         return null;
                     default:
                         Console.WriteLine("Invalid option.");
+                        soundPlayer.Play(SoundEffect.Error);
                         Aestetics.WaitForEnter();
                         break;
                 }
