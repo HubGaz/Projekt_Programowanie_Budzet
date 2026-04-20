@@ -3,6 +3,7 @@ using BudgetManagement.FileManagement;
 using BudgetManagement.Authentication;
 using BudgetManagement.MoneyManagement;
 using BudgetManagement.Miscellaneous;
+using System.Globalization;
 
 namespace main
 {
@@ -22,6 +23,7 @@ namespace main
             Files.Create(userFiles.IncomeFilePath);
             Files.Create(userFiles.ExpenseFilePath);
             Files.Create(userFiles.BalanceFilePath);
+            double? monthlyExpenseLimit = null;
 
             while (true)
             {
@@ -82,9 +84,34 @@ namespace main
                         }
                         break;
                     case "2": Console.WriteLine("-> Adding expense...");
+                    Console.Write("Set/Change monthly limit now? (y/n): ");
+                    string? changeLimit = Console.ReadLine();
+                    if (string.Equals(changeLimit, "y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.Write("Enter monthly limit amount: ");
+                        if (double.TryParse(Console.ReadLine(), out double newLimit) && newLimit >= 0)
+                        {
+                            monthlyExpenseLimit = newLimit;
+                            Console.WriteLine($"Monthly limit set to: {monthlyExpenseLimit:F2}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid limit amount. Keeping previous limit.");
+                            soundPlayer.Play(SoundEffect.Error);
+                        }
+                    }
+
                     Console.Write("Enter expense amount: ");
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
+                            var currentMonthExpenses = GetCurrentMonthTotal(Files.ReadAmountsByDate(userFiles.ExpenseFilePath));
+                            if (monthlyExpenseLimit.HasValue && currentMonthExpenses + expense > monthlyExpenseLimit.Value)
+                            {
+                                Console.WriteLine($"Monthly limit exceeded. Current month spent: {currentMonthExpenses:F2}, limit: {monthlyExpenseLimit.Value:F2}");
+                                soundPlayer.Play(SoundEffect.Warning);
+                                break;
+                            }
+
                             Expenses.AddExpense(expense);
                             Files.AppendAmountByDate(userFiles.ExpenseFilePath, expense);
                             Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
@@ -246,6 +273,24 @@ namespace main
                         break;
                 }
             }
+        }
+
+        private static double GetCurrentMonthTotal(Dictionary<string, List<double>> history)
+        {
+            var now = DateTime.Now;
+            double total = 0;
+
+            foreach (var day in history)
+            {
+                if (DateTime.TryParseExact(day.Key, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) &&
+                    date.Month == now.Month &&
+                    date.Year == now.Year)
+                {
+                    total += day.Value.Sum();
+                }
+            }
+
+            return total;
         }
     }
 }
