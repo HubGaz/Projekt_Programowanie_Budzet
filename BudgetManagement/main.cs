@@ -105,18 +105,23 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
                             var currentMonthExpenses = GetCurrentMonthTotal(Files.ReadAmountsByDate(userFiles.ExpenseFilePath));
-                            if (monthlyExpenseLimit.HasValue && currentMonthExpenses + expense > monthlyExpenseLimit.Value)
-                            {
-                                Console.WriteLine($"Monthly limit exceeded. Current month spent: {currentMonthExpenses:F2}, limit: {monthlyExpenseLimit.Value:F2}");
-                                soundPlayer.Play(SoundEffect.Warning);
-                                break;
-                            }
-
                             Expenses.AddExpense(expense);
                             Files.AppendAmountByDate(userFiles.ExpenseFilePath, expense);
                             Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Expense added.");
-                            soundPlayer.Play(SoundEffect.Success);
+
+                            var monthTotalAfterAdd = currentMonthExpenses + expense;
+                            if (monthlyExpenseLimit.HasValue && monthTotalAfterAdd > monthlyExpenseLimit.Value)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"Monthly limit exceeded: {monthTotalAfterAdd:F2} / {monthlyExpenseLimit.Value:F2}");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                soundPlayer.Play(SoundEffect.Warning);
+                            }
+                            else
+                            {
+                                soundPlayer.Play(SoundEffect.Success);
+                            }
                         }
                         else
                         {
