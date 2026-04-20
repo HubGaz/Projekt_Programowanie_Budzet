@@ -113,9 +113,11 @@ namespace main
                             var monthTotalAfterAdd = currentMonthExpenses + expense;
                             if (monthlyExpenseLimit.HasValue && monthTotalAfterAdd > monthlyExpenseLimit.Value)
                             {
+                                var previousColor = Console.ForegroundColor;
                                 Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine($"Monthly limit exceeded: {monthTotalAfterAdd:F2} / {monthlyExpenseLimit.Value:F2}");
-                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write("Miesieczny limit zostal przekroczony");
+                                Console.ForegroundColor = previousColor;
+                                Console.WriteLine($": {monthTotalAfterAdd:F2} / {monthlyExpenseLimit.Value:F2}");
                                 soundPlayer.Play(SoundEffect.Warning);
                             }
                             else
