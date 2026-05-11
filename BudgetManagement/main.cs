@@ -12,6 +12,7 @@ namespace main
         {
             using var soundPlayer = new AsyncSoundPlayer();
             bool isSoundEnabled = true;
+            var currentTextColor = ConsoleColor.White;
             void PlaySound(SoundEffect effect)
             {
                 if (isSoundEnabled)
@@ -46,6 +47,7 @@ namespace main
                     // Some debug/host environments don't support console clear.
                 }
 
+                Console.ForegroundColor = currentTextColor;
                 Aestetics.Logo();
                 Console.WriteLine($"Logged in as: {loggedInUsername}");
 
@@ -58,10 +60,11 @@ namespace main
                 Console.WriteLine("5. Check income history");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("6. Clear all entries");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = currentTextColor;
                 Console.WriteLine("7. Exit");
                 Console.WriteLine($"8. Toggle sounds ({(isSoundEnabled ? "ON" : "OFF")})");
-                Console.Write("Choose option (1-8): ");
+                Console.WriteLine($"9. Change text color (current: {currentTextColor})");
+                Console.Write("Choose option (1-9): ");
                 string? input = Console.ReadLine();
 
                 if (input is null)
@@ -71,7 +74,7 @@ namespace main
                     Aestetics.WaitForEnter();
                     continue;
                 }
-////Testtttttttt
+
                 switch (input)
                 {
                     case "1": Console.WriteLine("-> Adding income...");
@@ -175,6 +178,38 @@ namespace main
                     case "8":
                         isSoundEnabled = !isSoundEnabled;
                         Console.WriteLine($"Sounds are now {(isSoundEnabled ? "ON" : "OFF")}.");
+                        break;
+                    case "9":
+                        Console.WriteLine("Choose text color:");
+                        Console.WriteLine("1. White");
+                        Console.WriteLine("2. Green");
+                        Console.WriteLine("3. Blue");
+                        Console.WriteLine("4. Black");
+                        Console.Write("Your choice (1-4): ");
+                        var colorChoice = Console.ReadLine();
+
+                        switch (colorChoice)
+                        {
+                            case "1":
+                                currentTextColor = ConsoleColor.White;
+                                break;
+                            case "2":
+                                currentTextColor = ConsoleColor.Green;
+                                break;
+                            case "3":
+                                currentTextColor = ConsoleColor.Blue;
+                                break;
+                            case "4":
+                                currentTextColor = ConsoleColor.Black;
+                                break;
+                            default:
+                                Console.WriteLine("Invalid color choice.");
+                                PlaySound(SoundEffect.Error);
+                                break;
+                        }
+
+                        Console.ForegroundColor = currentTextColor;
+                        Console.WriteLine($"Text color changed to: {currentTextColor}");
                         break;
                     default:
                         Console.WriteLine("-> Invalid option.");
