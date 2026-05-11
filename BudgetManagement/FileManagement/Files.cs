@@ -6,85 +6,113 @@ namespace BudgetManagement.FileManagement;
 public static class Files
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private const string IncomeKey = "income";
+    private const string ExpenseKey = "expense";
 
-    public static void Create(string filePath)
+    public static void CreateOrMigrateUserDataFile(
+        string dataFilePath,
+        string legacyIncomeFilePath,
+        string legacyExpenseFilePath,
+        string legacyBalanceFilePath)
     {
         try
         {
-            if (!System.IO.File.Exists(filePath))
+            if (System.IO.File.Exists(dataFilePath))
             {
-                using (System.IO.File.Create(filePath)) { }
-                Console.WriteLine($"File created at: {filePath}");
+                return;
             }
+
+            var migratedData = new UserFinanceData
+            {
+                Entries = new Dictionary<string, Dictionary<string, List<double>>>
+                {
+                    [IncomeKey] = ReadDateKeyedAmountsOrConvertLegacy(legacyIncomeFilePath, DateTime.Now.ToString("yyyy-MM-dd")),
+                    [ExpenseKey] = ReadDateKeyedAmountsOrConvertLegacy(legacyExpenseFilePath, DateTime.Now.ToString("yyyy-MM-dd"))
+                }
+            };
+
+            migratedData.CurrentBalance = migratedData.Entries[IncomeKey].Values.SelectMany(x => x).Sum()
+                - migratedData.Entries[ExpenseKey].Values.SelectMany(x => x).Sum();
+            migratedData.UpdatedAt = DateTimeOffset.Now;
+
+            SaveUserFinanceData(dataFilePath, migratedData);
+            Console.WriteLine($"Data file created at: {dataFilePath}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred while creating the file: {ex.Message}");
+            Console.WriteLine($"An error occurred while creating or migrating user data file: {ex.Message}");
         }
     }
 
-    public static void Delete(string filePath)
+    public static void ResetUserData(string dataFilePath)
     {
         try
         {
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.Delete(filePath);
-                Console.WriteLine($"File deleted at: {filePath}");
-            }
-            else
-            {
-                Console.WriteLine($"File does not exist at: {filePath}");
-            }
+            var emptyData = new UserFinanceData();
+            SaveUserFinanceData(dataFilePath, emptyData);
+            Console.WriteLine($"User data reset in: {dataFilePath}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred while deleting the file: {ex.Message}");
+            Console.WriteLine($"An error occurred while resetting user data: {ex.Message}");
         }
     }
 
-    public static void Append(string filePath, double amount)
+    public static void AppendIncomeByDate(string dataFilePath, double amount, DateTime? date = null)
     {
-        try
-        {
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.AppendAllText(filePath, amount.ToString() + Environment.NewLine);
-                Console.WriteLine($"Amount appended to file at: {filePath}");
-            }
-            else
-            {
-                Console.WriteLine($"File does not exist at: {filePath}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred while appending to the file: {ex.Message}");
-        }
+        AppendEntryByDate(dataFilePath, IncomeKey, amount, date);
     }
 
-    public static void AppendAmountByDate(string filePath, double amount, DateTime? date = null)
+    public static void AppendExpenseByDate(string dataFilePath, double amount, DateTime? date = null)
+    {
+        AppendEntryByDate(dataFilePath, ExpenseKey, amount, date);
+    }
+
+    public static Dictionary<string, List<double>> ReadIncomeAmountsByDate(string dataFilePath)
+    {
+        return ReadEntriesByDate(dataFilePath, IncomeKey);
+    }
+
+    public static Dictionary<string, List<double>> ReadExpenseAmountsByDate(string dataFilePath)
+    {
+        return ReadEntriesByDate(dataFilePath, ExpenseKey);
+    }
+
+    public static double ReadTotalIncome(string dataFilePath)
+    {
+        return ReadIncomeAmountsByDate(dataFilePath).Values.SelectMany(x => x).Sum();
+    }
+
+    public static double ReadTotalExpense(string dataFilePath)
+    {
+        return ReadExpenseAmountsByDate(dataFilePath).Values.SelectMany(x => x).Sum();
+    }
+
+    public static double ReadCurrentBalance(string dataFilePath)
+    {
+        var data = ReadUserFinanceData(dataFilePath);
+        return data.CurrentBalance;
+    }
+
+    private static void AppendEntryByDate(string dataFilePath, string entryType, double amount, DateTime? date = null)
     {
         try
         {
-            if (!System.IO.File.Exists(filePath))
-            {
-                using (System.IO.File.Create(filePath)) { }
-            }
-
+            var data = ReadUserFinanceData(dataFilePath);
             var effectiveDate = (date ?? DateTime.Now).ToString("yyyy-MM-dd");
-            var data = ReadDateKeyedAmountsOrConvertLegacy(filePath, effectiveDate);
+            var entries = EnsureEntryType(data, entryType);
 
-            if (!data.TryGetValue(effectiveDate, out var list))
+            if (!entries.TryGetValue(effectiveDate, out var list))
             {
                 list = new List<double>();
-                data[effectiveDate] = list;
+                entries[effectiveDate] = list;
             }
 
             list.Add(amount);
+            data.CurrentBalance = ReadTotalByType(data, IncomeKey) - ReadTotalByType(data, ExpenseKey);
+            data.UpdatedAt = DateTimeOffset.Now;
 
-            var json = JsonSerializer.Serialize(data, JsonOptions);
-            System.IO.File.WriteAllText(filePath, json);
+            SaveUserFinanceData(dataFilePath, data);
         }
         catch (Exception ex)
         {
@@ -92,17 +120,13 @@ public static class Files
         }
     }
 
-    public static Dictionary<string, List<double>> ReadAmountsByDate(string filePath)
+    private static Dictionary<string, List<double>> ReadEntriesByDate(string dataFilePath, string entryType)
     {
         try
         {
-            if (!System.IO.File.Exists(filePath))
-            {
-                return new Dictionary<string, List<double>>();
-            }
-
-            var fallbackKey = DateTime.Now.ToString("yyyy-MM-dd");
-            return ReadDateKeyedAmountsOrConvertLegacy(filePath, fallbackKey);
+            var data = ReadUserFinanceData(dataFilePath);
+            var entries = EnsureEntryType(data, entryType);
+            return entries;
         }
         catch
         {
@@ -110,14 +134,76 @@ public static class Files
         }
     }
 
-    public static double ReadTotalAmount(string filePath)
+    private static UserFinanceData ReadUserFinanceData(string filePath)
     {
-        var data = ReadAmountsByDate(filePath);
-        return data.Values.SelectMany(x => x).Sum();
+        if (!System.IO.File.Exists(filePath))
+        {
+            var empty = new UserFinanceData();
+            SaveUserFinanceData(filePath, empty);
+            return empty;
+        }
+
+        var text = System.IO.File.ReadAllText(filePath);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return new UserFinanceData();
+        }
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<UserFinanceData>(text);
+            if (parsed is not null)
+            {
+                EnsureEntryType(parsed, IncomeKey);
+                EnsureEntryType(parsed, ExpenseKey);
+                parsed.CurrentBalance = ReadTotalByType(parsed, IncomeKey) - ReadTotalByType(parsed, ExpenseKey);
+                return parsed;
+            }
+        }
+        catch
+        {
+            // ignored: fallback below
+        }
+
+        // Backward compatibility with an older single-entry dictionary format.
+        try
+        {
+            var parsedLegacy = JsonSerializer.Deserialize<Dictionary<string, List<double>>>(text);
+            if (parsedLegacy is not null)
+            {
+                return new UserFinanceData
+                {
+                    Entries = new Dictionary<string, Dictionary<string, List<double>>>
+                    {
+                        [IncomeKey] = parsedLegacy,
+                        [ExpenseKey] = new Dictionary<string, List<double>>()
+                    },
+                    CurrentBalance = parsedLegacy.Values.SelectMany(x => x).Sum(),
+                    UpdatedAt = DateTimeOffset.Now
+                };
+            }
+        }
+        catch
+        {
+            // ignored: return empty
+        }
+
+        return new UserFinanceData();
+    }
+
+    private static void SaveUserFinanceData(string filePath, UserFinanceData data)
+    {
+        var json = JsonSerializer.Serialize(data, JsonOptions);
+        System.IO.File.WriteAllText(filePath, json);
     }
 
     private static Dictionary<string, List<double>> ReadDateKeyedAmountsOrConvertLegacy(string filePath, string fallbackDateKey)
     {
+        if (!System.IO.File.Exists(filePath))
+        {
+            return new Dictionary<string, List<double>>();
+        }
+
         var text = System.IO.File.ReadAllText(filePath);
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -137,7 +223,6 @@ public static class Files
             // ignored: try legacy conversion below
         }
 
-        // Legacy format: one amount per line (not JSON). Convert it under today's key.
         var converted = new Dictionary<string, List<double>>();
         var lines = System.IO.File.ReadAllLines(filePath);
         var amounts = new List<double>();
@@ -157,22 +242,32 @@ public static class Files
         return converted;
     }
 
-    public static void WriteCurrentBalance(string filePath, double currentBalance)
+    private static Dictionary<string, List<double>> EnsureEntryType(UserFinanceData data, string entryType)
     {
-        try
+        if (!data.Entries.TryGetValue(entryType, out var entries))
         {
-            var payload = new
-            {
-                currentBalance = currentBalance,
-                updatedAt = DateTimeOffset.Now
-            };
+            entries = new Dictionary<string, List<double>>();
+            data.Entries[entryType] = entries;
+        }
 
-            var json = JsonSerializer.Serialize(payload, JsonOptions);
-            System.IO.File.WriteAllText(filePath, json);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred while writing balance JSON: {ex.Message}");
-        }
+        return entries;
+    }
+
+    private static double ReadTotalByType(UserFinanceData data, string entryType)
+    {
+        var entries = EnsureEntryType(data, entryType);
+        return entries.Values.SelectMany(x => x).Sum();
+    }
+
+    private sealed class UserFinanceData
+    {
+        public Dictionary<string, Dictionary<string, List<double>>> Entries { get; set; } =
+            new()
+            {
+                [IncomeKey] = new Dictionary<string, List<double>>(),
+                [ExpenseKey] = new Dictionary<string, List<double>>()
+            };
+        public double CurrentBalance { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.Now;
     }
 }
