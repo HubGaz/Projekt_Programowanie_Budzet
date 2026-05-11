@@ -11,6 +11,14 @@ namespace main
         static void Main(string[] args)
         {
             using var soundPlayer = new AsyncSoundPlayer();
+            bool isSoundEnabled = true;
+            void PlaySound(SoundEffect effect)
+            {
+                if (isSoundEnabled)
+                {
+                    soundPlayer.Play(effect);
+                }
+            }
 
             var loggedInUsername = ShowAuthScreen(soundPlayer);
             if (loggedInUsername is null)
@@ -52,13 +60,14 @@ namespace main
                 Console.WriteLine("6. Clear all entries");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("7. Exit");
-                Console.Write("Choose option (1-7): ");
+                Console.WriteLine($"8. Toggle sounds ({(isSoundEnabled ? "ON" : "OFF")})");
+                Console.Write("Choose option (1-8): ");
                 string? input = Console.ReadLine();
 
                 if (input is null)
                 {
                     Console.WriteLine("-> Invalid option.");
-                    soundPlayer.Play(SoundEffect.Error);
+                    PlaySound(SoundEffect.Error);
                     Aestetics.WaitForEnter();
                     continue;
                 }
@@ -73,12 +82,12 @@ namespace main
                             Files.AppendAmountByDate(userFiles.IncomeFilePath, income);
                             Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Income added.");
-                            soundPlayer.Play(SoundEffect.Success);
+                            PlaySound(SoundEffect.Success);
                         }
                         else
                         {
                             Console.WriteLine("Invalid amount.");
-                            soundPlayer.Play(SoundEffect.Error);
+                            PlaySound(SoundEffect.Error);
                         }
                         break;
                     case "2": Console.WriteLine("-> Adding expense...");
@@ -89,12 +98,12 @@ namespace main
                             Files.AppendAmountByDate(userFiles.ExpenseFilePath, expense);
                             Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
                             Console.WriteLine("Expense added.");
-                            soundPlayer.Play(SoundEffect.Success);
+                            PlaySound(SoundEffect.Success);
                         }
                         else
                         {
                             Console.WriteLine("Invalid amount.");
-                            soundPlayer.Play(SoundEffect.Error);
+                            PlaySound(SoundEffect.Error);
                         }
                     break;
                     case "3":
@@ -150,22 +159,26 @@ namespace main
                             Files.Create(userFiles.BalanceFilePath);
                             Incomes.Total_Incomes = 0.0;
                             Expenses.Total_Expenses = 0.0;
-                            soundPlayer.Play(SoundEffect.Warning);
+                            PlaySound(SoundEffect.Warning);
                         }
                         else
                         {
                             Console.WriteLine("Delete cancelled.");
-                            soundPlayer.Play(SoundEffect.Info);
+                            PlaySound(SoundEffect.Info);
                         }
                         break;
                     case "7":
                         Console.WriteLine("-> Goodbye!");
-                        soundPlayer.Play(SoundEffect.Info);
+                        PlaySound(SoundEffect.Info);
                         Aestetics.WaitForEnter();
                         return;
+                    case "8":
+                        isSoundEnabled = !isSoundEnabled;
+                        Console.WriteLine($"Sounds are now {(isSoundEnabled ? "ON" : "OFF")}.");
+                        break;
                     default:
                         Console.WriteLine("-> Invalid option.");
-                        soundPlayer.Play(SoundEffect.Error);
+                        PlaySound(SoundEffect.Error);
                         break;
                     
                 }
