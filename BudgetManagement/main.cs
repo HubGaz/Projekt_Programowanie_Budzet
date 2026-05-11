@@ -184,7 +184,7 @@ namespace main
                         Console.WriteLine("1. White");
                         Console.WriteLine("2. Green");
                         Console.WriteLine("3. Blue");
-                        Console.WriteLine("4. Black");
+                        Console.WriteLine("4. Yellow");
                         Console.Write("Your choice (1-4): ");
                         var colorChoice = Console.ReadLine();
 
@@ -200,7 +200,7 @@ namespace main
                                 currentTextColor = ConsoleColor.Blue;
                                 break;
                             case "4":
-                                currentTextColor = ConsoleColor.Black;
+                                currentTextColor = ConsoleColor.Yellow;
                                 break;
                             default:
                                 Console.WriteLine("Invalid color choice.");
