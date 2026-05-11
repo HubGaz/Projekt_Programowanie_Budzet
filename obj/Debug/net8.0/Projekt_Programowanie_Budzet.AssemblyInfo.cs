@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Projekt_Programowanie_Budzet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9df6d4a116b7997bd72bee7ee4b4df0f925960d6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7e1e18be2566f6cec86efbbf5cfab8e268e3b2fb")]
 [assembly: System.Reflection.AssemblyProductAttribute("Projekt_Programowanie_Budzet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Projekt_Programowanie_Budzet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
