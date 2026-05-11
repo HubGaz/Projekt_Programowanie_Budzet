@@ -13,7 +13,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Projekt_Programowanie_Budzet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
+<<<<<<< Updated upstream
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+064bd7f47fbcaee0b5b6bf0bfbbf9ae552d72976")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2cfcc2e6859cbb436695216a836ffc54d29c98d")]
+>>>>>>> Stashed changes
 [assembly: System.Reflection.AssemblyProductAttribute("Projekt_Programowanie_Budzet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Projekt_Programowanie_Budzet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
