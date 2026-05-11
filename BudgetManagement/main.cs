@@ -71,7 +71,7 @@ namespace main
                     Aestetics.WaitForEnter();
                     continue;
                 }
-
+////Testtttttttt
                 switch (input)
                 {
                     case "1": Console.WriteLine("-> Adding income...");
