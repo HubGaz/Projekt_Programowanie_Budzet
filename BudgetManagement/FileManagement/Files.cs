@@ -9,38 +9,15 @@ public static class Files
     private const string IncomeKey = "income";
     private const string ExpenseKey = "expense";
 
-    public static void CreateOrMigrateUserDataFile(
-        string dataFilePath,
-        string legacyIncomeFilePath,
-        string legacyExpenseFilePath,
-        string legacyBalanceFilePath)
+    public static void EnsureUserDataFile(string dataFilePath)
     {
         try
         {
-            if (System.IO.File.Exists(dataFilePath))
-            {
-                return;
-            }
-
-            var migratedData = new UserFinanceData
-            {
-                Entries = new Dictionary<string, Dictionary<string, List<double>>>
-                {
-                    [IncomeKey] = ReadDateKeyedAmountsOrConvertLegacy(legacyIncomeFilePath, DateTime.Now.ToString("yyyy-MM-dd")),
-                    [ExpenseKey] = ReadDateKeyedAmountsOrConvertLegacy(legacyExpenseFilePath, DateTime.Now.ToString("yyyy-MM-dd"))
-                }
-            };
-
-            migratedData.CurrentBalance = migratedData.Entries[IncomeKey].Values.SelectMany(x => x).Sum()
-                - migratedData.Entries[ExpenseKey].Values.SelectMany(x => x).Sum();
-            migratedData.UpdatedAt = DateTimeOffset.Now;
-
-            SaveUserFinanceData(dataFilePath, migratedData);
-            Console.WriteLine($"Data file created at: {dataFilePath}");
+            ReadUserFinanceData(dataFilePath);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred while creating or migrating user data file: {ex.Message}");
+            Console.WriteLine($"An error occurred while creating user data file: {ex.Message}");
         }
     }
 
@@ -90,8 +67,7 @@ public static class Files
 
     public static double ReadCurrentBalance(string dataFilePath)
     {
-        var data = ReadUserFinanceData(dataFilePath);
-        return data.CurrentBalance;
+        return ReadTotalIncome(dataFilePath) - ReadTotalExpense(dataFilePath);
     }
 
     private static void AppendEntryByDate(string dataFilePath, string entryType, double amount, DateTime? date = null)
@@ -125,8 +101,7 @@ public static class Files
         try
         {
             var data = ReadUserFinanceData(dataFilePath);
-            var entries = EnsureEntryType(data, entryType);
-            return entries;
+            return EnsureEntryType(data, entryType);
         }
         catch
         {
@@ -162,29 +137,6 @@ public static class Files
         }
         catch
         {
-            // ignored: fallback below
-        }
-
-        // Backward compatibility with an older single-entry dictionary format.
-        try
-        {
-            var parsedLegacy = JsonSerializer.Deserialize<Dictionary<string, List<double>>>(text);
-            if (parsedLegacy is not null)
-            {
-                return new UserFinanceData
-                {
-                    Entries = new Dictionary<string, Dictionary<string, List<double>>>
-                    {
-                        [IncomeKey] = parsedLegacy,
-                        [ExpenseKey] = new Dictionary<string, List<double>>()
-                    },
-                    CurrentBalance = parsedLegacy.Values.SelectMany(x => x).Sum(),
-                    UpdatedAt = DateTimeOffset.Now
-                };
-            }
-        }
-        catch
-        {
             // ignored: return empty
         }
 
@@ -195,51 +147,6 @@ public static class Files
     {
         var json = JsonSerializer.Serialize(data, JsonOptions);
         System.IO.File.WriteAllText(filePath, json);
-    }
-
-    private static Dictionary<string, List<double>> ReadDateKeyedAmountsOrConvertLegacy(string filePath, string fallbackDateKey)
-    {
-        if (!System.IO.File.Exists(filePath))
-        {
-            return new Dictionary<string, List<double>>();
-        }
-
-        var text = System.IO.File.ReadAllText(filePath);
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return new Dictionary<string, List<double>>();
-        }
-
-        try
-        {
-            var parsed = JsonSerializer.Deserialize<Dictionary<string, List<double>>>(text);
-            if (parsed is not null)
-            {
-                return parsed;
-            }
-        }
-        catch
-        {
-            // ignored: try legacy conversion below
-        }
-
-        var converted = new Dictionary<string, List<double>>();
-        var lines = System.IO.File.ReadAllLines(filePath);
-        var amounts = new List<double>();
-        foreach (var line in lines)
-        {
-            if (double.TryParse(line, out var value))
-            {
-                amounts.Add(value);
-            }
-        }
-
-        if (amounts.Count > 0)
-        {
-            converted[fallbackDateKey] = amounts;
-        }
-
-        return converted;
     }
 
     private static Dictionary<string, List<double>> EnsureEntryType(UserFinanceData data, string entryType)

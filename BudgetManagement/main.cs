@@ -20,11 +20,7 @@ namespace main
             }
 
             var userFiles = new UserFilePaths(loggedInUsername);
-            Files.CreateOrMigrateUserDataFile(
-                userFiles.DataFilePath,
-                userFiles.IncomeFilePath,
-                userFiles.ExpenseFilePath,
-                userFiles.BalanceFilePath);
+            Files.EnsureUserDataFile(userFiles.DataFilePath);
             double? monthlyExpenseLimit = null;
 
             while (true)
