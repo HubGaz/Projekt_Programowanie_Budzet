@@ -2,16 +2,12 @@ namespace BudgetManagement.Authentication;
 
 public sealed class UserFilePaths
 {
-    public string IncomeFilePath { get; }
-    public string ExpenseFilePath { get; }
-    public string BalanceFilePath { get; }
+    public string DataFilePath { get; }
 
     public UserFilePaths(string username)
     {
         var safeUsername = BuildSafeSegment(username);
-        IncomeFilePath = $"{safeUsername}_income.json";
-        ExpenseFilePath = $"{safeUsername}_expense.json";
-        BalanceFilePath = $"{safeUsername}_balance.json";
+        DataFilePath = $"{safeUsername}_finance.json";
     }
 
     private static string BuildSafeSegment(string input)

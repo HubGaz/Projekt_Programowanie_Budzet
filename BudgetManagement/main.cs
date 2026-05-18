@@ -28,15 +28,12 @@ namespace main
             }
 
             var userFiles = new UserFilePaths(loggedInUsername);
-            Files.Create(userFiles.IncomeFilePath);
-            Files.Create(userFiles.ExpenseFilePath);
-            Files.Create(userFiles.BalanceFilePath);
+            Files.EnsureUserDataFile(userFiles.DataFilePath);
 
             while (true)
             {
-                Incomes.Total_Incomes = Files.ReadTotalAmount(userFiles.IncomeFilePath);
-                Expenses.Total_Expenses = Files.ReadTotalAmount(userFiles.ExpenseFilePath);
-                Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
+                Incomes.Total_Incomes = Files.ReadTotalIncome(userFiles.DataFilePath);
+                Expenses.Total_Expenses = Files.ReadTotalExpense(userFiles.DataFilePath);
 
                 try
                 {
@@ -82,8 +79,7 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double income))
                         {
                             Incomes.AddIncome(income);
-                            Files.AppendAmountByDate(userFiles.IncomeFilePath, income);
-                            Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
+                            Files.AppendIncomeByDate(userFiles.DataFilePath, income);
                             Console.WriteLine("Income added.");
                             PlaySound(SoundEffect.Success);
                         }
@@ -98,8 +94,7 @@ namespace main
                         if (double.TryParse(Console.ReadLine(), out double expense))
                         {
                             Expenses.AddExpense(expense);
-                            Files.AppendAmountByDate(userFiles.ExpenseFilePath, expense);
-                            Files.WriteCurrentBalance(userFiles.BalanceFilePath, Incomes.Total_Incomes - Expenses.Total_Expenses);
+                            Files.AppendExpenseByDate(userFiles.DataFilePath, expense);
                             Console.WriteLine("Expense added.");
                             PlaySound(SoundEffect.Success);
                         }
@@ -116,7 +111,7 @@ namespace main
                     case "4":
                         Console.WriteLine("-> Expense history:");
                         {
-                            var history = Files.ReadAmountsByDate(userFiles.ExpenseFilePath);
+                            var history = Files.ReadExpenseAmountsByDate(userFiles.DataFilePath);
                             if (history.Count == 0)
                             {
                                 Console.WriteLine("(empty)");
@@ -133,7 +128,7 @@ namespace main
                     case "5":
                         Console.WriteLine("-> Income history:");
                         {
-                            var history = Files.ReadAmountsByDate(userFiles.IncomeFilePath);
+                            var history = Files.ReadIncomeAmountsByDate(userFiles.DataFilePath);
                             if (history.Count == 0)
                             {
                                 Console.WriteLine("(empty)");
@@ -153,13 +148,8 @@ namespace main
                         if (string.Equals(confirmDelete, "y", StringComparison.OrdinalIgnoreCase))
                         {
                             Console.WriteLine("-> Deleting all entries...");
-                            Files.Delete(userFiles.IncomeFilePath);
-                            Files.Delete(userFiles.ExpenseFilePath);
-                            Files.Delete(userFiles.BalanceFilePath);
-                            Console.WriteLine("All files deleted.");
-                            Files.Create(userFiles.IncomeFilePath);
-                            Files.Create(userFiles.ExpenseFilePath);
-                            Files.Create(userFiles.BalanceFilePath);
+                            Files.ResetUserData(userFiles.DataFilePath);
+                            Console.WriteLine("All entries deleted.");
                             Incomes.Total_Incomes = 0.0;
                             Expenses.Total_Expenses = 0.0;
                             PlaySound(SoundEffect.Warning);
