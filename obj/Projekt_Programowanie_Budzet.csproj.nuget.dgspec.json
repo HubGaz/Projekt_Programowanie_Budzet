@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj": {}
+    "c:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj": {}
   },
   "projects": {
-    "C:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj": {
+    "c:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj",
+        "projectUniqueName": "c:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj",
         "projectName": "Projekt_Programowanie_Budzet",
-        "projectPath": "C:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj",
+        "projectPath": "c:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\Projekt_Programowanie_Budzet.csproj",
         "packagesPath": "C:\\Users\\diabl\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\obj\\",
+        "outputPath": "c:\\Users\\diabl\\Desktop\\Progr_Proj\\Projekt_Programowanie_Budzet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\diabl\\AppData\\Roaming\\NuGet\\NuGet.Config",
