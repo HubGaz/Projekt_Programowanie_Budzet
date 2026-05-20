@@ -21,14 +21,27 @@ namespace main
                 }
             }
 
-            var loggedInUsername = ShowAuthScreen(soundPlayer);
-            if (loggedInUsername is null)
+            var loginResult = ShowAuthScreen(soundPlayer);
+            if (loginResult is null)
             {
                 return;
             }
 
-            var userFiles = new UserFilePaths(loggedInUsername);
-            Files.EnsureUserDataFile(userFiles.DataFilePath);
+            var userFiles = new UserFilePaths(loginResult.Username);
+            try
+            {
+                Files.BindEncryptionSession(loginResult.Username, loginResult.Password, userFiles.DataFilePath);
+                Files.EnsureUserDataFile(userFiles.DataFilePath);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(ex.Message);
+                soundPlayer.Play(SoundEffect.Error);
+                Aestetics.WaitForEnter();
+                return;
+            }
+
+            var loggedInUsername = loginResult.Username;
 
             while (true)
             {
@@ -212,7 +225,9 @@ namespace main
             }
         }
 
-        private static string? ShowAuthScreen(AsyncSoundPlayer soundPlayer)
+        private sealed record LoginResult(string Username, string Password);
+
+        private static LoginResult? ShowAuthScreen(AsyncSoundPlayer soundPlayer)
         {
             while (true)
             {
@@ -247,7 +262,7 @@ namespace main
                             Console.WriteLine(loginMessage);
                             soundPlayer.Play(SoundEffect.Success);
                             Aestetics.WaitForEnter();
-                            return loginUsername.Trim();
+                            return new LoginResult(loginUsername.Trim(), loginPassword);
                         }
 
                         Console.WriteLine(loginMessage);

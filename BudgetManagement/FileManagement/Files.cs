@@ -1,4 +1,6 @@
 
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace BudgetManagement.FileManagement;
@@ -8,6 +10,12 @@ public static class Files
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private const string IncomeKey = "income";
     private const string ExpenseKey = "expense";
+    private static EncryptedFileSession? _session;
+
+    public static void BindEncryptionSession(string username, string password, string dataFilePath)
+    {
+        _session = EncryptedFileSession.Create(username, password, dataFilePath);
+    }
 
     public static void EnsureUserDataFile(string dataFilePath)
     {
@@ -111,6 +119,8 @@ public static class Files
 
     private static UserFinanceData ReadUserFinanceData(string filePath)
     {
+        RequireSession();
+
         if (!System.IO.File.Exists(filePath))
         {
             var empty = new UserFinanceData();
@@ -118,26 +128,53 @@ public static class Files
             return empty;
         }
 
-        var text = System.IO.File.ReadAllText(filePath);
-        if (string.IsNullOrWhiteSpace(text))
+        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        if (fileBytes.Length == 0)
         {
             return new UserFinanceData();
         }
 
         try
         {
-            var parsed = JsonSerializer.Deserialize<UserFinanceData>(text);
+            string json;
+            if (FileCrypto.IsEncryptedFile(fileBytes))
+            {
+                var plaintext = _session!.Decrypt(fileBytes);
+                json = Encoding.UTF8.GetString(plaintext);
+            }
+            else if (FileCrypto.IsPlaintextJson(fileBytes))
+            {
+                json = Encoding.UTF8.GetString(fileBytes);
+            }
+            else
+            {
+                throw new CryptographicException("Unrecognized user data file format.");
+            }
+
+            var parsed = JsonSerializer.Deserialize<UserFinanceData>(json);
             if (parsed is not null)
             {
                 EnsureEntryType(parsed, IncomeKey);
                 EnsureEntryType(parsed, ExpenseKey);
                 parsed.CurrentBalance = ReadTotalByType(parsed, IncomeKey) - ReadTotalByType(parsed, ExpenseKey);
+
+                if (!FileCrypto.IsEncryptedFile(fileBytes))
+                {
+                    SaveUserFinanceData(filePath, parsed);
+                }
+
                 return parsed;
             }
         }
-        catch
+        catch (CryptographicException ex)
         {
-            // ignored: return empty
+            throw new InvalidOperationException(
+                "Cannot decrypt user data. The file may be corrupted or the password is incorrect.",
+                ex);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException("User data file is corrupted.", ex);
         }
 
         return new UserFinanceData();
@@ -145,8 +182,20 @@ public static class Files
 
     private static void SaveUserFinanceData(string filePath, UserFinanceData data)
     {
+        RequireSession();
+
         var json = JsonSerializer.Serialize(data, JsonOptions);
-        System.IO.File.WriteAllText(filePath, json);
+        var plaintext = Encoding.UTF8.GetBytes(json);
+        var encrypted = _session!.Encrypt(plaintext);
+        System.IO.File.WriteAllBytes(filePath, encrypted);
+    }
+
+    private static void RequireSession()
+    {
+        if (_session is null)
+        {
+            throw new InvalidOperationException("Encryption session is not initialized. Log in first.");
+        }
     }
 
     private static Dictionary<string, List<double>> EnsureEntryType(UserFinanceData data, string entryType)
