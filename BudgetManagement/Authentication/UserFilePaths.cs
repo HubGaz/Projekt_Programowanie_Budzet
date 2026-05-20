@@ -3,14 +3,19 @@ namespace BudgetManagement.Authentication;
 public sealed class UserFilePaths
 {
     public string DataFilePath { get; }
+    public string AccountFilePath { get; }
 
     public UserFilePaths(string username)
     {
         var safeUsername = BuildSafeSegment(username);
         DataFilePath = $"{safeUsername}_finance.json";
+        AccountFilePath = $"{safeUsername}.account";
     }
 
-    private static string BuildSafeSegment(string input)
+    public static string GetAccountFilePath(string username) =>
+        $"{BuildSafeSegment(username)}.account";
+
+    public static string BuildSafeSegment(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -23,6 +28,6 @@ public sealed class UserFilePaths
             .Select(ch => invalidChars.Contains(ch) ? '_' : ch)
             .ToArray());
 
-        return cleaned.Replace(' ', '_');
+        return cleaned.Replace(' ', '_').ToLowerInvariant();
     }
 }

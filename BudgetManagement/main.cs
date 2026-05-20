@@ -257,12 +257,13 @@ namespace main
                         Console.Write("Password: ");
                         var loginPassword = Console.ReadLine() ?? string.Empty;
 
-                        if (AuthService.Login(loginUsername, loginPassword, out var loginMessage))
+                        if (AuthService.Login(loginUsername, loginPassword, out var loginMessage, out var loggedInUsername)
+                            && loggedInUsername is not null)
                         {
                             Console.WriteLine(loginMessage);
                             soundPlayer.Play(SoundEffect.Success);
                             Aestetics.WaitForEnter();
-                            return new LoginResult(loginUsername.Trim(), loginPassword);
+                            return new LoginResult(loggedInUsername, loginPassword);
                         }
 
                         Console.WriteLine(loginMessage);
