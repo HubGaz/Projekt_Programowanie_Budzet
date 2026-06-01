@@ -64,6 +64,38 @@ public static class Files
         System.IO.File.WriteAllBytes(newFilePath, newSession.Encrypt(plaintextBytes));
     }
 
+    public static void ReencryptWithNewPassword(
+        string filePath,
+        string username,
+        string oldPassword,
+        string newPassword)
+    {
+        if (!System.IO.File.Exists(filePath))
+        {
+            return;
+        }
+
+        var oldSession = EncryptedFileSession.Create(username, oldPassword, filePath);
+        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        byte[] plaintextBytes;
+
+        if (FileCrypto.IsEncryptedFile(fileBytes))
+        {
+            plaintextBytes = oldSession.Decrypt(fileBytes);
+        }
+        else if (FileCrypto.IsPlaintextJson(fileBytes))
+        {
+            plaintextBytes = fileBytes;
+        }
+        else
+        {
+            throw new CryptographicException("Unrecognized user data file format.");
+        }
+
+        var newSession = EncryptedFileSession.Create(username, newPassword, filePath);
+        System.IO.File.WriteAllBytes(filePath, newSession.Encrypt(plaintextBytes));
+    }
+
     public static void EnsureUserDataFile(string dataFilePath)
     {
         try

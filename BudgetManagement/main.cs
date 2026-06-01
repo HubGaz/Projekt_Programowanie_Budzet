@@ -261,8 +261,9 @@ namespace main
                 Console.WriteLine();
                 Console.WriteLine("=== Account settings ===");
                 Console.WriteLine("1. Change username");
-                Console.WriteLine("2. Back");
-                Console.Write("Choose option (1-2): ");
+                Console.WriteLine("2. Change password");
+                Console.WriteLine("3. Back");
+                Console.Write("Choose option (1-3): ");
                 var choice = Console.ReadLine();
 
                 switch (choice)
@@ -273,7 +274,7 @@ namespace main
                         Console.Write("New username: ");
                         var newUsername = Console.ReadLine() ?? string.Empty;
                         Console.Write("Password (to confirm): ");
-                        var confirmPassword = Console.ReadLine() ?? string.Empty;
+                        var confirmPassword = ConsoleInput.ReadMaskedLine();
 
                         if (ProfileService.ChangeUsername(
                                 loggedInUsername,
@@ -293,6 +294,31 @@ namespace main
                         Aestetics.WaitForEnter();
                         break;
                     case "2":
+                        Console.Write("Current password: ");
+                        var currentPassword = ConsoleInput.ReadMaskedLine();
+                        Console.Write("New password: ");
+                        var newPassword = ConsoleInput.ReadMaskedLine();
+                        Console.Write("Repeat new password: ");
+                        var repeatNewPassword = ConsoleInput.ReadMaskedLine();
+
+                        if (ProfileService.ChangePassword(
+                                loggedInUsername,
+                                currentPassword,
+                                newPassword,
+                                repeatNewPassword,
+                                out var passwordMessage))
+                        {
+                            loggedInPassword = newPassword;
+                            Console.WriteLine(passwordMessage);
+                            playSound(SoundEffect.Success);
+                            return true;
+                        }
+
+                        Console.WriteLine(passwordMessage);
+                        playSound(SoundEffect.Error);
+                        Aestetics.WaitForEnter();
+                        break;
+                    case "3":
                         return false;
                     default:
                         Console.WriteLine("Invalid option.");
@@ -331,7 +357,7 @@ namespace main
                         Console.Write("Username: ");
                         var loginUsername = Console.ReadLine() ?? string.Empty;
                         Console.Write("Password: ");
-                        var loginPassword = Console.ReadLine() ?? string.Empty;
+                        var loginPassword = ConsoleInput.ReadMaskedLine();
 
                         if (AuthService.Login(loginUsername, loginPassword, out var loginMessage, out var loggedInUsername)
                             && loggedInUsername is not null)
@@ -350,9 +376,9 @@ namespace main
                         Console.Write("Username: ");
                         var registerUsername = Console.ReadLine() ?? string.Empty;
                         Console.Write("Password: ");
-                        var registerPassword = Console.ReadLine() ?? string.Empty;
+                        var registerPassword = ConsoleInput.ReadMaskedLine();
                         Console.Write("Repeat password: ");
-                        var repeatPassword = Console.ReadLine() ?? string.Empty;
+                        var repeatPassword = ConsoleInput.ReadMaskedLine();
 
                         var registerSucceeded = AuthService.Register(registerUsername, registerPassword, repeatPassword, out var registerMessage);
                         Console.WriteLine(registerMessage);

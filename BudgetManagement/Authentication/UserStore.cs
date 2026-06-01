@@ -129,6 +129,50 @@ public static class UserStore
         }
     }
 
+    public static bool TryChangePassword(
+        string currentUsername,
+        string currentPassword,
+        string newPassword,
+        out string message)
+    {
+        var trimmedUsername = currentUsername.Trim();
+
+        if (!TryLogin(trimmedUsername, currentPassword, out var account, out message) || account is null)
+        {
+            return false;
+        }
+
+        if (string.Equals(currentPassword, newPassword, StringComparison.Ordinal))
+        {
+            message = "The new password is the same as the current one.";
+            return false;
+        }
+
+        var paths = new UserFilePaths(account.Username);
+        var accountPath = UserFilePaths.GetAccountFilePath(account.Username);
+
+        account.Salt = PasswordHasher.CreateSalt();
+        account.PasswordHash = PasswordHasher.Hash(newPassword, account.Salt);
+
+        try
+        {
+            SaveEncryptedAccount(accountPath, account.Username, newPassword, account);
+            FileManagement.Files.ReencryptWithNewPassword(
+                paths.DataFilePath,
+                account.Username,
+                currentPassword,
+                newPassword);
+
+            message = "Password has been changed.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            message = $"Could not change password: {ex.Message}";
+            return false;
+        }
+    }
+
     public static bool TryLogin(string username, string password, out UserAccount? account, out string message)
     {
         account = null;
