@@ -43,3 +43,8 @@ C:\Users\diabl\Desktop\Progr_Proj\Projekt_Programowanie_Budzet\obj\Debug\net8.0\
 C:\Users\diabl\Desktop\Progr_Proj\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.pdb
 C:\Users\diabl\Desktop\Progr_Proj\Projekt_Programowanie_Budzet\obj\Debug\net8.0\Projekt_Programowanie_Budzet.genruntimeconfig.cache
 C:\Users\diabl\Desktop\Progr_Proj\Projekt_Programowanie_Budzet\obj\Debug\net8.0\ref\Projekt_Programowanie_Budzet.dll
+c:\Users\diabl\Desktop\Progr_Proj\_build_verify\Projekt_Programowanie_Budzet.exe
+c:\Users\diabl\Desktop\Progr_Proj\_build_verify\Projekt_Programowanie_Budzet.deps.json
+c:\Users\diabl\Desktop\Progr_Proj\_build_verify\Projekt_Programowanie_Budzet.runtimeconfig.json
+c:\Users\diabl\Desktop\Progr_Proj\_build_verify\Projekt_Programowanie_Budzet.dll
+c:\Users\diabl\Desktop\Progr_Proj\_build_verify\Projekt_Programowanie_Budzet.pdb
