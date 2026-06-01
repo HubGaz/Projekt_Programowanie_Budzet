@@ -1,5 +1,12 @@
 namespace BudgetManagement.Authentication;
 
+public enum AccountSettingsOutcome
+{
+    Continue,
+    CredentialsChanged,
+    SessionEnded
+}
+
 public static class ProfileService
 {
     public static bool ChangeUsername(
@@ -37,5 +44,35 @@ public static class ProfileService
         }
 
         return UserStore.TryChangePassword(currentUsername, currentPassword, newPassword, out message);
+    }
+
+    public static bool SetAlias(
+        string username,
+        string password,
+        string? alias,
+        out string message) =>
+        UserStore.TrySetAlias(username, password, alias, out message);
+
+    public static bool SuspendAccount(
+        string username,
+        string password,
+        string? reason,
+        out string message) =>
+        UserStore.TrySuspendAccount(username, password, reason, out message);
+
+    public static bool ReactivateAccount(string username, string password, out string message) =>
+        UserStore.TryUnsuspendAccount(username, password, out message);
+
+    public static bool DeleteAccount(string username, string password, out string message) =>
+        UserStore.TryDeleteAccount(username, password, out message);
+
+    public static string FormatLoginLabel(string username, string? alias)
+    {
+        if (string.IsNullOrWhiteSpace(alias))
+        {
+            return username;
+        }
+
+        return $"{alias.Trim()} ({username})";
     }
 }

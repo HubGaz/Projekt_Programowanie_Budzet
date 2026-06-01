@@ -3,6 +3,30 @@ namespace BudgetManagement.Miscellaneous
 {
     public static class Aestetics
     {
+        public static void ClearConsole()
+        {
+            try
+            {
+                Console.Clear();
+            }
+            catch (IOException)
+            {
+                // Some debug/host environments don't support console clear.
+            }
+        }
+
+        public static void ClearAndShowLogo(ConsoleColor? foregroundColor = null)
+        {
+            ClearConsole();
+
+            if (foregroundColor.HasValue)
+            {
+                Console.ForegroundColor = foregroundColor.Value;
+            }
+
+            Logo();
+        }
+
         public static void WaitForEnter()
         {
             Console.WriteLine();
