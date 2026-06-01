@@ -27,10 +27,13 @@ namespace main
                 return;
             }
 
-            var userFiles = new UserFilePaths(loginResult.Username);
+            var loggedInUsername = loginResult.Username;
+            var loggedInPassword = loginResult.Password;
+            var userFiles = new UserFilePaths(loggedInUsername);
+
             try
             {
-                Files.BindEncryptionSession(loginResult.Username, loginResult.Password, userFiles.DataFilePath);
+                Files.BindEncryptionSession(loggedInUsername, loggedInPassword, userFiles.DataFilePath);
                 Files.EnsureUserDataFile(userFiles.DataFilePath);
             }
             catch (InvalidOperationException ex)
@@ -40,8 +43,6 @@ namespace main
                 Aestetics.WaitForEnter();
                 return;
             }
-
-            var loggedInUsername = loginResult.Username;
 
             while (true)
             {
@@ -74,7 +75,8 @@ namespace main
                 Console.WriteLine("7. Exit");
                 Console.WriteLine($"8. Toggle sounds ({(isSoundEnabled ? "ON" : "OFF")})");
                 Console.WriteLine($"9. Change text color (current: {currentTextColor})");
-                Console.Write("Choose option (1-9): ");
+                Console.WriteLine("10. Account settings");
+                Console.Write("Choose option (1-10): ");
                 string? input = Console.ReadLine();
 
                 if (input is null)
@@ -214,6 +216,27 @@ namespace main
                         Console.ForegroundColor = currentTextColor;
                         Console.WriteLine($"Text color changed to: {currentTextColor}");
                         break;
+                    case "10":
+                        if (ShowAccountSettings(
+                                ref loggedInUsername,
+                                ref loggedInPassword,
+                                ref userFiles,
+                                PlaySound))
+                        {
+                            try
+                            {
+                                Files.BindEncryptionSession(
+                                    loggedInUsername,
+                                    loggedInPassword,
+                                    userFiles.DataFilePath);
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                                PlaySound(SoundEffect.Error);
+                            }
+                        }
+                        break;
                     default:
                         Console.WriteLine("-> Invalid option.");
                         PlaySound(SoundEffect.Error);
@@ -226,6 +249,59 @@ namespace main
         }
 
         private sealed record LoginResult(string Username, string Password);
+
+        private static bool ShowAccountSettings(
+            ref string loggedInUsername,
+            ref string loggedInPassword,
+            ref UserFilePaths userFiles,
+            Action<SoundEffect> playSound)
+        {
+            while (true)
+            {
+                Console.WriteLine();
+                Console.WriteLine("=== Account settings ===");
+                Console.WriteLine("1. Change username");
+                Console.WriteLine("2. Back");
+                Console.Write("Choose option (1-2): ");
+                var choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.Write($"Current username: {loggedInUsername}");
+                        Console.WriteLine();
+                        Console.Write("New username: ");
+                        var newUsername = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Password (to confirm): ");
+                        var confirmPassword = Console.ReadLine() ?? string.Empty;
+
+                        if (ProfileService.ChangeUsername(
+                                loggedInUsername,
+                                confirmPassword,
+                                newUsername,
+                                out var changeMessage))
+                        {
+                            loggedInUsername = newUsername.Trim();
+                            userFiles = new UserFilePaths(loggedInUsername);
+                            Console.WriteLine(changeMessage);
+                            playSound(SoundEffect.Success);
+                            return true;
+                        }
+
+                        Console.WriteLine(changeMessage);
+                        playSound(SoundEffect.Error);
+                        Aestetics.WaitForEnter();
+                        break;
+                    case "2":
+                        return false;
+                    default:
+                        Console.WriteLine("Invalid option.");
+                        playSound(SoundEffect.Error);
+                        Aestetics.WaitForEnter();
+                        break;
+                }
+            }
+        }
 
         private static LoginResult? ShowAuthScreen(AsyncSoundPlayer soundPlayer)
         {

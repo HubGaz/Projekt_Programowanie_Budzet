@@ -46,6 +46,89 @@ public static class UserStore
         }
     }
 
+    public static bool TryChangeUsername(
+        string currentUsername,
+        string password,
+        string newUsername,
+        out string message)
+    {
+        var trimmedCurrent = currentUsername.Trim();
+        var trimmedNew = newUsername.Trim();
+
+        if (string.Equals(trimmedCurrent, trimmedNew, StringComparison.OrdinalIgnoreCase))
+        {
+            message = "The new username is the same as the current one.";
+            return false;
+        }
+
+        if (!TryLogin(trimmedCurrent, password, out var account, out message) || account is null)
+        {
+            return false;
+        }
+
+        if (IsUsernameTaken(trimmedNew))
+        {
+            message = "A user with this name already exists.";
+            return false;
+        }
+
+        var oldPaths = new UserFilePaths(account.Username);
+        var newPaths = new UserFilePaths(trimmedNew);
+        var oldAccountPath = UserFilePaths.GetAccountFilePath(account.Username);
+        var newAccountPath = UserFilePaths.GetAccountFilePath(trimmedNew);
+
+        if (File.Exists(newAccountPath))
+        {
+            message = "A user with this name already exists.";
+            return false;
+        }
+
+        var previousUsername = account.Username;
+        account.Username = trimmedNew;
+
+        try
+        {
+            SaveEncryptedAccount(newAccountPath, trimmedNew, password, account);
+            FileManagement.Files.MigrateEncryptedDataFile(
+                oldPaths.DataFilePath,
+                newPaths.DataFilePath,
+                previousUsername,
+                trimmedNew,
+                password);
+
+            if (File.Exists(oldAccountPath))
+            {
+                File.Delete(oldAccountPath);
+            }
+
+            if (File.Exists(oldPaths.DataFilePath)
+                && !string.Equals(oldPaths.DataFilePath, newPaths.DataFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Delete(oldPaths.DataFilePath);
+            }
+
+            message = "Username has been changed.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            if (File.Exists(newAccountPath))
+            {
+                try
+                {
+                    File.Delete(newAccountPath);
+                }
+                catch
+                {
+                    // Best-effort rollback.
+                }
+            }
+
+            message = $"Could not change username: {ex.Message}";
+            return false;
+        }
+    }
+
     public static bool TryLogin(string username, string password, out UserAccount? account, out string message)
     {
         account = null;

@@ -17,6 +17,53 @@ public static class Files
         _session = EncryptedFileSession.Create(username, password, dataFilePath);
     }
 
+    public static void MigrateEncryptedDataFile(
+        string oldFilePath,
+        string newFilePath,
+        string oldKeyUsername,
+        string newKeyUsername,
+        string password)
+    {
+        if (!System.IO.File.Exists(oldFilePath))
+        {
+            return;
+        }
+
+        if (string.Equals(oldFilePath, newFilePath, StringComparison.OrdinalIgnoreCase))
+        {
+            var samePathSession = EncryptedFileSession.Create(newKeyUsername, password, oldFilePath);
+            var fileBytes = System.IO.File.ReadAllBytes(oldFilePath);
+
+            if (FileCrypto.IsEncryptedFile(fileBytes))
+            {
+                var plaintext = samePathSession.Decrypt(fileBytes);
+                System.IO.File.WriteAllBytes(oldFilePath, samePathSession.Encrypt(plaintext));
+            }
+
+            return;
+        }
+
+        var oldSession = EncryptedFileSession.Create(oldKeyUsername, password, oldFilePath);
+        var oldBytes = System.IO.File.ReadAllBytes(oldFilePath);
+        byte[] plaintextBytes;
+
+        if (FileCrypto.IsEncryptedFile(oldBytes))
+        {
+            plaintextBytes = oldSession.Decrypt(oldBytes);
+        }
+        else if (FileCrypto.IsPlaintextJson(oldBytes))
+        {
+            plaintextBytes = oldBytes;
+        }
+        else
+        {
+            throw new CryptographicException("Unrecognized user data file format.");
+        }
+
+        var newSession = EncryptedFileSession.Create(newKeyUsername, password, newFilePath);
+        System.IO.File.WriteAllBytes(newFilePath, newSession.Encrypt(plaintextBytes));
+    }
+
     public static void EnsureUserDataFile(string dataFilePath)
     {
         try
